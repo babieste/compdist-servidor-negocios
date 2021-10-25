@@ -5,7 +5,7 @@ install-deps:
 	pip3 install -r requirements.txt
 
 run-dev:
-	flask run
+	flask run -p 5001
 
 run-prd:
-	gunicorn wsgi:app -b 0.0.0.0:5000
+	gunicorn wsgi:app -b 0.0.0.0:5001
