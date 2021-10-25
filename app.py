@@ -36,47 +36,41 @@ def raise_not_authorized():
 
 def _saldo(conta_id, auth_token):
     # Retorna saldo
-    saldo_response = requests.get(
+    response = requests.get(
         servidor_dados_url + '/conta/' + conta_id + '/saldo',
         headers={'authorization': auth_token}
     )
-    converted_saldo_response = saldo_response.json()
-    return converted_saldo_response
+    converted_response = response.json()
+    return converted_response
 
 def _saque(conta_id, auth_token, valor):
-    converted_saldo_response = _saldo(conta_id, auth_token, valor)
+    saldo_response = _saldo(conta_id, auth_token, valor)
 
     # Retira valor do saque no saldo
-    novo_saldo = int(converted_saldo_response['saldo']) - int(valor)
+    novo_saldo = int(saldo_response['saldo']) - int(valor)
 
     # Atualiza saldo
-    deposito_response = requests.put(
+    response = requests.put(
         servidor_dados_url + '/conta/' + conta_id + '/saldo/' + str(novo_saldo),
         headers={'authorization': auth_token}
     )
-
-    print(deposito_response)
-    converted_deposito_response = deposito_response.json()
-
-    return converted_deposito_response
+    converted_response = response.json()
+    return converted_response
 
 def _deposito(conta_id, auth_token, valor):
     # Retorna saldo
-    converted_saldo_response = _saldo(conta_id, auth_token, valor)
+    saldo_response = _saldo(conta_id, auth_token, valor)
 
     # Acrescenta valor do depósito no saldo
-    novo_saldo = int(converted_saldo_response['saldo']) + int(valor)
+    novo_saldo = int(saldo_response['saldo']) + int(valor)
 
     # Atualiza saldo
-    deposito_response = requests.put(
+    response = requests.put(
         servidor_dados_url + '/conta/' + conta_id + '/saldo/' + str(novo_saldo),
         headers={'authorization': auth_token}
     )
-
-    print(deposito_response)
-    converted_deposito_response = deposito_response.json()
-
-    return converted_deposito_response
+    converted_response = response.json()
+    return converted_response
 
 @app.route("/")
 def index():
