@@ -2,6 +2,7 @@ from flask import Flask, abort, request, Request
 from dotenv import load_dotenv
 from os import environ
 import requests
+import logging
 
 load_dotenv()
 
@@ -9,11 +10,20 @@ servidor_dados_url = environ.get('SERVIDOR_DADOS_URL')
 
 app = Flask(__name__)
 
+logging.basicConfig(filename='record.log', filemode='w', level=logging.DEBUG, format=f'%(asctime)s - %(message)s')
+
 tokens = [
     {'serv_negocio_id': 1, 'auth_token': 'secret#1'},
     {'serv_negocio_id': 2, 'auth_token': 'secret#2'},
     {'serv_negocio_id': 3, 'auth_token': 'secret#3'},
 ]
+
+num_operacao: int = 0
+
+# Incrementa a quantidade de operações realizadas no servidor
+def increment_operation():
+    global num_operacao
+    num_operacao += 1
 
 def authorize(request: Request):
     received_auth_token = request.headers.get('Authorization')
@@ -22,7 +32,6 @@ def authorize(request: Request):
         if token['auth_token'] == received_auth_token:
             auth_token = received_auth_token
     return auth_token
-
 
 def raise_server_error():
     abort(app.make_response(
@@ -41,6 +50,8 @@ def _saldo(conta_id, auth_token):
         headers={'authorization': auth_token}
     )
     converted_response = response.json()
+    app.logger.debug(str(num_operacao) + '- SERVIDOR 1 ' + '- SALDO ' + '- CONTA ' + str(conta_id))
+    increment_operation()
     return converted_response
 
 def _saque(conta_id, auth_token, valor):
@@ -55,6 +66,8 @@ def _saque(conta_id, auth_token, valor):
         headers={'authorization': auth_token}
     )
     converted_response = response.json()
+    app.logger.debug(str(num_operacao) + '- SERVIDOR 1 ' + '- SAQUE ' + '- CONTA ' + str(conta_id) + '-  VALOR ' + str(valor))
+    increment_operation()
     return converted_response
 
 def _deposito(conta_id, auth_token, valor):
@@ -70,6 +83,8 @@ def _deposito(conta_id, auth_token, valor):
         headers={'authorization': auth_token}
     )
     converted_response = response.json()
+    app.logger.debug(str(num_operacao) + '- SERVIDOR 1 ' + '- DEPÓSITO ' + '- CONTA ' + str(conta_id) + '-  VALOR ' + str(valor))
+    increment_operation()
     return converted_response
 
 @app.route("/")
