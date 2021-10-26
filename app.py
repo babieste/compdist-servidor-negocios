@@ -55,6 +55,7 @@ def _saque(conta_id, auth_token, valor):
         headers={'authorization': auth_token}
     )
     converted_response = response.json()
+    print('saque:' + str(converted_response))
     return converted_response
 
 def _deposito(conta_id, auth_token, valor):
@@ -70,6 +71,7 @@ def _deposito(conta_id, auth_token, valor):
         headers={'authorization': auth_token}
     )
     converted_response = response.json()
+    print('deposito:' + str(converted_response))
     return converted_response
 
 @app.route("/")
@@ -120,11 +122,24 @@ def saldo(conta_id):
 # Transferência da conta <conta_origem> para a conta <conta_dest> do valor <valor>
 @app.put('/transferencia/<conta_origem>/<conta_dest>/<valor>')
 def transferencia(conta_origem, conta_dest, valor):
-    #TODO
-    return {
-        'operation': 'transferencia',
-        'conta_origem': conta_origem,
-        'conta_dest': conta_dest,
-        'valor': valor
-    }
 
+    conta_origem_token = get_auth_token(int(conta_origem))
+    print('conta_origem_token ' + conta_origem_token)
+    conta_dest_token = get_auth_token(int(conta_dest))
+    print('conta_dest_token ' + conta_dest_token)
+
+    if conta_origem_token != None and conta_dest_token != None:
+        try:
+            # Saque da conta de origem
+            _saque(conta_origem, conta_origem_token, valor)
+
+            # Depósito na conta de destino
+            _deposito(conta_dest, conta_dest_token, valor)
+
+            return app.make_response(
+                ({'message': 'Transferência realizada.'}, 200)
+            )
+        except:
+            raise_server_error()
+    else:
+        raise_not_authorized()
