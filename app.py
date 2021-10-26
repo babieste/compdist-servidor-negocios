@@ -1,4 +1,4 @@
-from flask import Flask, abort
+from flask import Flask, abort, request, Request
 from dotenv import load_dotenv
 from os import environ
 import requests
@@ -15,19 +15,21 @@ tokens = [
     {'serv_negocio_id': 3, 'auth_token': 'secret#3'},
 ]
 
-def get_auth_token(id):
+def authorize(request: Request):
+    received_auth_token = request.headers.get('Authorization')
     auth_token = None
     for token in tokens:
-        if token['serv_negocio_id'] == id:
-            auth_token = token['auth_token']  
+        if token['auth_token'] == received_auth_token:
+            auth_token = received_auth_token
     return auth_token
+
 
 def raise_server_error():
     abort(app.make_response(
         ({'message': 'Não foi possível realizar a operação.'}, 500)
     ))
 
-def raise_not_authorized():
+def raise_unauthorized():
     abort(app.make_response(
         ({'message': 'Não autorizado.'}, 401)
     ))
@@ -77,8 +79,7 @@ def index():
 # Aumenta o saldo da conta <conta_id> pelo valor <valor> e retorna nada
 @app.put('/deposito/<conta_id>/<valor>')
 def deposito(conta_id, valor):
-
-    auth_token = get_auth_token(int(conta_id))
+    auth_token = authorize(request)
 
     if (auth_token != None):
         try:
@@ -86,12 +87,12 @@ def deposito(conta_id, valor):
         except:
             raise_server_error()
     else:
-        raise_not_authorized()
+        raise_unauthorized()
 
 # Diminui o saldo da conta <conta_id> pelo valor <valor> e retorna nada
 @app.put('/saque/<conta_id>/<valor>')
 def saque(conta_id, valor):
-    auth_token = get_auth_token(int(conta_id))
+    auth_token = authorize(request)
 
     if (auth_token != None):
         try:
@@ -99,13 +100,12 @@ def saque(conta_id, valor):
         except:
             raise_server_error()
     else:
-        raise_not_authorized()
+        raise_unauthorized()
 
 # Retorna o saldo da conta <conta_id>
 @app.get('/saldo/<conta_id>')
 def saldo(conta_id):
-
-    auth_token = get_auth_token(int(conta_id))
+    auth_token = authorize(request)
 
     if auth_token != None:
         try:
@@ -113,16 +113,13 @@ def saldo(conta_id):
         except:
             raise_server_error()
     else:
-        raise_not_authorized()
+        raise_unauthorized()
 
 # Transferência da conta <conta_origem> para a conta <conta_dest> do valor <valor>
 @app.put('/transferencia/<conta_origem>/<conta_dest>/<valor>')
 def transferencia(conta_origem, conta_dest, valor):
-
-    conta_origem_token = get_auth_token(int(conta_origem))
-    print('conta_origem_token ' + conta_origem_token)
-    conta_dest_token = get_auth_token(int(conta_dest))
-    print('conta_dest_token ' + conta_dest_token)
+    conta_origem_token = authorize(request)
+    conta_dest_token = authorize(request)
 
     if conta_origem_token != None and conta_dest_token != None:
         try:
@@ -138,4 +135,4 @@ def transferencia(conta_origem, conta_dest, valor):
         except:
             raise_server_error()
     else:
-        raise_not_authorized()
+        raise_unauthorized()
