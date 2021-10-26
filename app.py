@@ -1,9 +1,7 @@
-from logging import exception
 from flask import Flask, abort
 from dotenv import load_dotenv
 from os import environ
 import requests
-from requests.api import get
 
 load_dotenv()
 
@@ -44,7 +42,7 @@ def _saldo(conta_id, auth_token):
     return converted_response
 
 def _saque(conta_id, auth_token, valor):
-    saldo_response = _saldo(conta_id, auth_token, valor)
+    saldo_response = _saldo(conta_id, auth_token)
 
     # Retira valor do saque no saldo
     novo_saldo = int(saldo_response['saldo']) - int(valor)
@@ -55,12 +53,11 @@ def _saque(conta_id, auth_token, valor):
         headers={'authorization': auth_token}
     )
     converted_response = response.json()
-    print('saque:' + str(converted_response))
     return converted_response
 
 def _deposito(conta_id, auth_token, valor):
     # Retorna saldo
-    saldo_response = _saldo(conta_id, auth_token, valor)
+    saldo_response = _saldo(conta_id, auth_token)
 
     # Acrescenta valor do depósito no saldo
     novo_saldo = int(saldo_response['saldo']) + int(valor)
@@ -71,7 +68,6 @@ def _deposito(conta_id, auth_token, valor):
         headers={'authorization': auth_token}
     )
     converted_response = response.json()
-    print('deposito:' + str(converted_response))
     return converted_response
 
 @app.route("/")
