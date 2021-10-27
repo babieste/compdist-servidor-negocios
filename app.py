@@ -7,10 +7,17 @@ import logging
 load_dotenv()
 
 servidor_dados_url = environ.get('SERVIDOR_DADOS_URL')
+servidor_id = environ.get('SERVIDOR_ID')
 
 app = Flask(__name__)
 
-logging.basicConfig(filename='record.log', filemode='w', level=logging.DEBUG, format=f'%(asctime)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format=f'%(asctime)s [%(levelname)s] %(message)s',
+                    handlers=[
+                        logging.FileHandler('record.log', mode='w'),
+                        logging.StreamHandler()
+                    ])
+
+app.logger.info('Inicializando o servidor de negócio {}'.format(servidor_id))
 
 tokens = [
     {'serv_negocio_id': 1, 'auth_token': 'secret#1'},
@@ -50,7 +57,7 @@ def _saldo(conta_id, auth_token):
         headers={'authorization': auth_token}
     )
     converted_response = response.json()
-    app.logger.debug(str(num_operacao) + '- SERVIDOR 1 ' + '- SALDO ' + '- CONTA ' + str(conta_id))
+    app.logger.debug(str(num_operacao) + '- SERVIDOR ' + servidor_id + ' - OPERAÇÃO: SALDO - CONTA ' + str(conta_id))
     increment_operation()
     return converted_response
 
@@ -66,7 +73,7 @@ def _saque(conta_id, auth_token, valor):
         headers={'authorization': auth_token}
     )
     converted_response = response.json()
-    app.logger.debug(str(num_operacao) + '- SERVIDOR 1 ' + '- SAQUE ' + '- CONTA ' + str(conta_id) + '-  VALOR ' + str(valor))
+    app.logger.debug(str(num_operacao) + '- SERVIDOR ' + servidor_id + ' - OPERAÇÃO: SAQUE - CONTA ' + str(conta_id) + '-  VALOR ' + str(valor))
     increment_operation()
     return converted_response
 
@@ -83,7 +90,7 @@ def _deposito(conta_id, auth_token, valor):
         headers={'authorization': auth_token}
     )
     converted_response = response.json()
-    app.logger.debug(str(num_operacao) + '- SERVIDOR 1 ' + '- DEPÓSITO ' + '- CONTA ' + str(conta_id) + '-  VALOR ' + str(valor))
+    app.logger.debug(str(num_operacao) + '- SERVIDOR ' + servidor_id + ' - OPERAÇÃO: DEPÓSITO - CONTA ' + str(conta_id) + '-  VALOR ' + str(valor))
     increment_operation()
     return converted_response
 
