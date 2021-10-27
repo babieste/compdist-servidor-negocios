@@ -21,6 +21,8 @@ Authorization: <auth_token>
 <th> Status Code </th><th> Descrição </th>
 </tr>
 
+<tr></tr>
+
 <tr>
 <td>200</td>
 <td>
@@ -35,6 +37,9 @@ Operação bem-sucedida.
 
 </td>
 </tr>
+    
+<tr></tr>
+
 <tr>
 <td>401</td>
 <td>
@@ -48,6 +53,9 @@ Ocorre quando o token de autenticação informado no header `Authorization` é i
 
 </td>
 </tr>
+    
+<tr></tr>
+    
 <tr>
 <td>500</td>
 <td>
@@ -78,8 +86,10 @@ Authorization: <auth_token>
 
 <table>
 <tr>
-<th> Code </th><th> Description </th>
+<th> Status Code </th><th> Descrição </th>
 </tr>
+
+<tr></tr>
 
 <tr>
 <td>200</td>
@@ -95,6 +105,9 @@ Operação bem-sucedida.
 
 </td>
 </tr>
+    
+<tr></tr>
+
 <tr>
 <td>401</td>
 <td>
@@ -108,6 +121,9 @@ Ocorre quando o token de autenticação informado no header `Authorization` é i
 
 </td>
 </tr>
+    
+<tr></tr>
+    
 <tr>
 <td>500</td>
 <td>
@@ -129,8 +145,10 @@ Realiza a transação de saque de valor `<valor>` na conta com ID `<conta_id>`.
 
 <table>
 <tr>
-<th> Code </th><th> Description </th>
+<th> Status Code </th><th> Descrição </th>
 </tr>
+
+<tr></tr>
 
 <tr>
 <td>200</td>
@@ -146,6 +164,9 @@ Operação bem-sucedida.
 
 </td>
 </tr>
+    
+<tr></tr>
+
 <tr>
 <td>401</td>
 <td>
@@ -159,6 +180,9 @@ Ocorre quando o token de autenticação informado no header `Authorization` é i
 
 </td>
 </tr>
+    
+<tr></tr>
+    
 <tr>
 <td>500</td>
 <td>
@@ -180,8 +204,10 @@ Realiza uma transferência no valor `<valor>` da conta origem de ID `<conta_orig
 
 <table>
 <tr>
-<th> Code </th><th> Description </th>
+<th> Status Code </th><th> Descrição </th>
 </tr>
+
+<tr></tr>
 
 <tr>
 <td>200</td>
@@ -197,6 +223,9 @@ Operação bem-sucedida.
 
 </td>
 </tr>
+    
+<tr></tr>
+
 <tr>
 <td>401</td>
 <td>
@@ -210,6 +239,9 @@ Ocorre quando o token de autenticação informado no header `Authorization` é i
 
 </td>
 </tr>
+    
+<tr></tr>
+    
 <tr>
 <td>500</td>
 <td>
