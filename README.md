@@ -4,7 +4,7 @@ Neste repositório encontra-se o código para os servidores de negócio do proje
 
 ## Endpoints
 
-`GET /saldo/<conta_id>`
+## `GET /saldo/<conta_id>`
 
 Retorna o saldo para a conta com ID `<conta_id>` passado na URL.
 
@@ -64,7 +64,7 @@ Ocorre caso haja algum erro no serviço que não seja erro de autenticação, ta
 </table>
 
 
-`PUT /deposito/<conta_id>/<valor>`
+## `PUT /deposito/<conta_id>/<valor>`
 
 Realiza a transação de depósito de valor `<valor>` para a conta com ID `<conta_id>`.
 
@@ -123,7 +123,7 @@ Ocorre caso haja algum erro no serviço que não seja erro de autenticação, ta
 </tr>
 </table>
 
-`PUT /saque/<conta_id>/<valor>`
+## `PUT /saque/<conta_id>/<valor>`
 
 Realiza a transação de saque de valor `<valor>` na conta com ID `<conta_id>`.
 
@@ -174,7 +174,7 @@ Ocorre caso haja algum erro no serviço que não seja erro de autenticação, ta
 </tr>
 </table>
 
-`PUT /transferencia/<conta_origem>/<conta_dest>/<valor>`
+## `PUT /transferencia/<conta_origem>/<conta_dest>/<valor>`
 
 Realiza uma transferência no valor `<valor>` da conta origem de ID `<conta_origem>` para a conta destino de ID `<conta_dest>`.
 
