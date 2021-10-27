@@ -42,12 +42,12 @@ def authorize(request: Request):
 
 def raise_server_error():
     abort(app.make_response(
-        ({'message': 'Não foi possível realizar a operação.'}, 500)
+        ({'message': 'Não foi possível realizar a operação'}, 500)
     ))
 
 def raise_unauthorized():
     abort(app.make_response(
-        ({'message': 'Não autorizado.'}, 401)
+        ({'message': 'Não autorizado'}, 401)
     ))
 
 def _saldo(conta_id, auth_token):
