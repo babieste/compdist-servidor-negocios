@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  servidor-negocios-1:
+    build: .
+    ports:
+      - "5001:5001"
+    environment:
+      SERVIDOR_DADOS_URL: http://servidor-dados:5000
+      SERVIDOR_ID: 1
+    networks:
+      - servidores
+    command: make run-prd-serv-1
+  servidor-negocios-2:
+    build: .
+    ports:
+      - "5002:5002"
+    environment:
+      SERVIDOR_DADOS_URL: http://servidor-dados:5000
+      SERVIDOR_ID: 1
+    networks:
+      - servidores
+    command: make run-prd-serv-2
+  servidor-negocios-3:
+    build: .
+    ports:
+      - "5003:5003"
+    environment:
+      SERVIDOR_DADOS_URL: http://servidor-dados:5000
+      SERVIDOR_ID: 1
+    networks:
+      - servidores
+    command: make run-prd-serv-3
+networks:
+  servidores:
+    external: true
