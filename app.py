@@ -20,9 +20,9 @@ logging.basicConfig(level=logging.DEBUG, format=f'%(asctime)s [%(levelname)s] %(
 app.logger.info('Inicializando o servidor de negócio {}'.format(servidor_id))
 
 tokens = [
-    {'serv_negocio_id': 1, 'auth_token': 'secret#1'},
-    {'serv_negocio_id': 2, 'auth_token': 'secret#2'},
-    {'serv_negocio_id': 3, 'auth_token': 'secret#3'},
+    'secret#1',
+    'secret#2',
+    'secret#3'
 ]
 
 num_operacao: int = 0
@@ -35,20 +35,21 @@ def increment_operation():
 def authorize(request: Request):
     received_auth_token = request.headers.get('Authorization')
     auth_token = None
-    for token in tokens:
-        if token['auth_token'] == received_auth_token:
-            auth_token = received_auth_token
+    if received_auth_token in tokens:
+        auth_token = received_auth_token
     return auth_token
 
 def raise_server_error():
-    abort(app.make_response(
-        ({'message': 'Não foi possível realizar a operação'}, 500)
-    ))
+    response = app.make_response(
+        ({'message': 'Não foi possível realizar a operação'}, 500, [('x-server-id', servidor_id)])
+    )
+    abort(response)
 
 def raise_unauthorized():
-    abort(app.make_response(
-        ({'message': 'Não autorizado'}, 401)
-    ))
+    response = app.make_response(
+        ({'message': 'Não autorizado'}, 401, [('x-server-id', servidor_id)])
+    )
+    abort(response)
 
 def _saldo(conta_id, auth_token):
     # Retorna saldo
@@ -57,9 +58,12 @@ def _saldo(conta_id, auth_token):
         headers={'authorization': auth_token}
     )
     converted_response = response.json()
-    app.logger.debug(str(num_operacao) + '- SERVIDOR ' + servidor_id + ' - OPERAÇÃO: SALDO - CONTA ' + str(conta_id))
+    app.logger.debug(str(num_operacao) + ' - SERVIDOR ' + servidor_id + ' - OPERAÇÃO: SALDO - CONTA ' + str(conta_id))
     increment_operation()
-    return converted_response
+
+    return app.make_response(
+        (converted_response, response.status_code, [('x-server-id', servidor_id)])
+    )
 
 def _saque(conta_id, auth_token, valor):
     saldo_response = _saldo(conta_id, auth_token)
@@ -73,9 +77,12 @@ def _saque(conta_id, auth_token, valor):
         headers={'authorization': auth_token}
     )
     converted_response = response.json()
-    app.logger.debug(str(num_operacao) + '- SERVIDOR ' + servidor_id + ' - OPERAÇÃO: SAQUE - CONTA ' + str(conta_id) + '-  VALOR ' + str(valor))
+    app.logger.debug(str(num_operacao) + ' - SERVIDOR ' + servidor_id + ' - OPERAÇÃO: SAQUE - CONTA ' + str(conta_id) + '-  VALOR ' + str(valor))
     increment_operation()
-    return converted_response
+
+    return app.make_response(
+        (converted_response, response.status_code, [('x-server-id', servidor_id)])
+    )
 
 def _deposito(conta_id, auth_token, valor):
     # Retorna saldo
@@ -90,13 +97,18 @@ def _deposito(conta_id, auth_token, valor):
         headers={'authorization': auth_token}
     )
     converted_response = response.json()
-    app.logger.debug(str(num_operacao) + '- SERVIDOR ' + servidor_id + ' - OPERAÇÃO: DEPÓSITO - CONTA ' + str(conta_id) + '-  VALOR ' + str(valor))
+    app.logger.debug(str(num_operacao) + ' - SERVIDOR ' + servidor_id + ' - OPERAÇÃO: DEPÓSITO - CONTA ' + str(conta_id) + '-  VALOR ' + str(valor))
     increment_operation()
-    return converted_response
 
-@app.route("/")
+    return app.make_response(
+        (converted_response, response.status_code, [('x-server-id', servidor_id)])
+    )
+
+@app.route('/')
 def index():
-    return 'Hello World!'
+    return app.make_response(
+        ('Hello World!', [('x-server-id', servidor_id)])
+    )
 
 # Aumenta o saldo da conta <conta_id> pelo valor <valor> e retorna nada
 @app.put('/deposito/<conta_id>/<valor>')
@@ -152,7 +164,7 @@ def transferencia(conta_origem, conta_dest, valor):
             _deposito(conta_dest, conta_dest_token, valor)
 
             return app.make_response(
-                ({'message': 'Transferência realizada.'}, 200)
+                ({'message': 'Transferência realizada.'}, 200, [('x-server-id', servidor_id)])
             )
         except:
             raise_server_error()
