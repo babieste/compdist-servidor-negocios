@@ -11,11 +11,14 @@ servidor_id = environ.get('SERVIDOR_ID')
 
 app = Flask(__name__)
 
-logging.basicConfig(level=logging.DEBUG, format=f'%(asctime)s [%(levelname)s] %(message)s',
-                    handlers=[
-                        logging.FileHandler('logs/record.log', mode='w'),
-                        logging.StreamHandler()
-                    ])
+logging.basicConfig(
+    level=logging.DEBUG,
+    format=f'%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[
+        logging.FileHandler('logs/record.log', mode='w'),
+        logging.StreamHandler()
+    ]
+)
 
 app.logger.info('Inicializando o servidor de negócio {}'.format(servidor_id))
 
@@ -57,16 +60,17 @@ def _saldo(conta_id, auth_token):
         servidor_dados_url + '/conta/' + conta_id + '/saldo',
         headers={'authorization': auth_token}
     )
+
     converted_response = response.json()
+
     app.logger.debug(str(num_operacao) + ' - SERVIDOR ' + servidor_id + ' - OPERAÇÃO: SALDO - CONTA ' + str(conta_id))
+
     increment_operation()
 
-    return app.make_response(
-        (converted_response, response.status_code, [('x-server-id', servidor_id)])
-    )
+    return converted_response, response.status_code
 
 def _saque(conta_id, auth_token, valor):
-    saldo_response = _saldo(conta_id, auth_token)
+    saldo_response = _saldo(conta_id, auth_token)[0]
 
     # Retira valor do saque no saldo
     novo_saldo = int(saldo_response['saldo']) - int(valor)
@@ -76,17 +80,18 @@ def _saque(conta_id, auth_token, valor):
         servidor_dados_url + '/conta/' + conta_id + '/saldo/' + str(novo_saldo),
         headers={'authorization': auth_token}
     )
+
     converted_response = response.json()
-    app.logger.debug(str(num_operacao) + ' - SERVIDOR ' + servidor_id + ' - OPERAÇÃO: SAQUE - CONTA ' + str(conta_id) + '-  VALOR ' + str(valor))
+
+    app.logger.debug(str(num_operacao) + ' - SERVIDOR ' + servidor_id + ' - OPERAÇÃO: SAQUE - CONTA ' + str(conta_id) + ' -  VALOR ' + str(valor))
+
     increment_operation()
 
-    return app.make_response(
-        (converted_response, response.status_code, [('x-server-id', servidor_id)])
-    )
+    return converted_response, response.status_code
 
 def _deposito(conta_id, auth_token, valor):
     # Retorna saldo
-    saldo_response = _saldo(conta_id, auth_token)
+    saldo_response = _saldo(conta_id, auth_token)[0]
 
     # Acrescenta valor do depósito no saldo
     novo_saldo = int(saldo_response['saldo']) + int(valor)
@@ -96,13 +101,14 @@ def _deposito(conta_id, auth_token, valor):
         servidor_dados_url + '/conta/' + conta_id + '/saldo/' + str(novo_saldo),
         headers={'authorization': auth_token}
     )
+
     converted_response = response.json()
-    app.logger.debug(str(num_operacao) + ' - SERVIDOR ' + servidor_id + ' - OPERAÇÃO: DEPÓSITO - CONTA ' + str(conta_id) + '-  VALOR ' + str(valor))
+
+    app.logger.debug(str(num_operacao) + ' - SERVIDOR ' + servidor_id + ' - OPERAÇÃO: DEPÓSITO - CONTA ' + str(conta_id) + ' -  VALOR ' + str(valor))
+
     increment_operation()
 
-    return app.make_response(
-        (converted_response, response.status_code, [('x-server-id', servidor_id)])
-    )
+    return converted_response, response.status_code
 
 @app.route('/')
 def index():
@@ -117,7 +123,10 @@ def deposito(conta_id, valor):
 
     if (auth_token != None):
         try:
-            return _deposito(conta_id, auth_token, valor)
+            response = _deposito(conta_id, auth_token, valor)
+            return app.make_response(
+                (response[0], response[1], [('x-server-id', servidor_id)])
+            )
         except:
             raise_server_error()
     else:
@@ -130,7 +139,10 @@ def saque(conta_id, valor):
 
     if (auth_token != None):
         try:
-            return _saque(conta_id, auth_token, valor)
+            response = _saque(conta_id, auth_token, valor)
+            return app.make_response(
+                (response[0], response[1], [('x-server-id', servidor_id)])
+            )
         except:
             raise_server_error()
     else:
@@ -143,7 +155,10 @@ def saldo(conta_id):
 
     if auth_token != None:
         try:
-            return _saldo(conta_id, auth_token)
+            response = _saldo(conta_id, auth_token)
+            return app.make_response(
+                (response[0], response[1], [('x-server-id', servidor_id)])
+            )
         except:
             raise_server_error()
     else:
