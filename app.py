@@ -54,6 +54,23 @@ def raise_unauthorized():
     )
     abort(response)
 
+def _nova_conta(saldo):
+    response = requests.post(
+        servidor_dados_url + '/conta',
+        json={'saldo': saldo}
+    )
+
+    print('response ===>')
+    print(response)
+
+    converted_response = response.json()
+
+    app.logger.debug(str(num_operacao) + ' - SERVIDOR ' + servidor_id + ' - OPERAÇÃO: NOVA CONTA - SALDO: R$ ' + saldo)
+
+    increment_operation()
+
+    return converted_response, response.status_code
+
 def _saldo(conta_id, auth_token):
     # Retorna saldo
     response = requests.get(
@@ -115,6 +132,18 @@ def index():
     return app.make_response(
         ('Hello World!', [('x-server-id', servidor_id)])
     )
+
+@app.post('/conta')
+def nova_conta():
+    try:
+        saldo = request.get_json()['saldo']
+        print(saldo)
+        response = _nova_conta(str(saldo))
+        return app.make_response(
+            (response[0], response[1], [('x-server-id', servidor_id)])
+        )
+    except:
+        raise_server_error()
 
 # Aumenta o saldo da conta <conta_id> pelo valor <valor> e retorna nada
 @app.put('/deposito/<conta_id>/<valor>')
