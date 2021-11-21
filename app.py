@@ -60,9 +60,6 @@ def _nova_conta(saldo):
         json={'saldo': saldo}
     )
 
-    print('response ===>')
-    print(response)
-
     converted_response = response.json()
 
     app.logger.debug(str(num_operacao) + ' - SERVIDOR ' + servidor_id + ' - OPERAÇÃO: NOVA CONTA - SALDO: R$ ' + saldo)
@@ -137,10 +134,26 @@ def index():
 def nova_conta():
     try:
         saldo = request.get_json()['saldo']
-        print(saldo)
         response = _nova_conta(str(saldo))
         return app.make_response(
             (response[0], response[1], [('x-server-id', servidor_id)])
+        )
+    except:
+        raise_server_error()
+
+@app.get('/conta')
+def get_contas():
+    try:
+        response = requests.get(servidor_dados_url + '/conta')
+
+        converted_response = response.json()
+
+        app.logger.debug(str(num_operacao) + ' - SERVIDOR ' + servidor_id + ' - OPERAÇÃO: GET CONTAS')
+
+        increment_operation()
+
+        return app.make_response(
+            (converted_response, response.status_code, [('x-server-id', servidor_id)])
         )
     except:
         raise_server_error()
